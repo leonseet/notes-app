@@ -1,0 +1,62 @@
+[
+    {
+        "id": "1",
+        "title": "First Note",
+        "description": "First description",
+        "date": "June 9, 2023"
+    },
+    {
+        "id": "2",
+        "title": "Second Note",
+        "description": "Second description",
+        "date": "June 10, 2023"
+    },
+    {
+        "id": "3",
+        "title": "Third Note",
+        "description": "Third description",
+        "date": "June 11, 2023"
+    },
+    {
+        "id": "4",
+        "title": "Fourth Note",
+        "description": "Fourth description",
+        "date": "June 12, 2023"
+    },
+    {
+        "id": "5",
+        "title": "Fifth Note",
+        "description": "Fifth description",
+        "date": "June 13, 2023"
+    },
+    {
+        "id": "6",
+        "title": "Sixth Note",
+        "description": "Sixth description",
+        "date": "June 14, 2023"
+    },
+    {
+        "id": "7",
+        "title": "Seventh Note",
+        "description": "Seventh description",
+        "date": "June 15, 2023"
+    },
+    {
+        "id": "8",
+        "title": "Eighth Note",
+        "description": "Eighth description",
+        "date": "June 16, 2023"
+    },
+    {
+        "id": "9",
+        "title": "Ninth Note",
+        "description": "Ninth description",
+        "date": "June 17, 2023"
+    },
+    {
+        "id": "10",
+        "title": "Tenth Note",
+        "description": "Tenth description",
+        "date": "June 18, 2023"
+    }
+]
