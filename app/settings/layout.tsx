@@ -7,7 +7,7 @@ interface SettingsLayoutProps {
 
 export default async function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
-    <>
+    <div className="flex min-h-screen">
       <aside className="hidden w-[300px] flex-col md:flex md:border-r md:light:border-slate-200 md:dark:border-slate-800 px-5">
         <SettingsSidebar />
       </aside>
@@ -15,6 +15,6 @@ export default async function SettingsLayout({ children }: SettingsLayoutProps) 
       <div className="hidden">
         <CommandButton />
       </div>
-    </>
+    </div>
   )
 }

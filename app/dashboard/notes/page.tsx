@@ -2,6 +2,7 @@ import DashboardTopbar from "@/components/DashboardTopbar"
 import { Button } from "@/components/ui/button"
 import { MoreVertical } from "lucide-react"
 import { store } from "@/redux/store"
+import Link from "next/link"
 
 export const metadata = {
   title: "Dashboard",
@@ -23,7 +24,8 @@ export default async function DashboardPage() {
         </div>
 
         {notes.map((note) => (
-          <div
+          <Link
+            href={`/note/${note.id}`}
             key={note.id}
             className="border flex justify-between px-4 py-4 items-center hover:bg-accent"
           >
@@ -32,7 +34,7 @@ export default async function DashboardPage() {
               <p className="text-secondary-foreground text-xs">{note.date}</p>
             </div>
             <MoreVertical className="cursor-pointer" />
-          </div>
+          </Link>
         ))}
       </main>
     </div>
