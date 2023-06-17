@@ -3,9 +3,9 @@ export type DashboardConfig = {
   sidebarNav: SidebarNavItem[]
 }
 
-export type Note = {
-  id: string
-  title?: string
-  description?: string
-  date: string
-}
+// export type Note = {
+//   id: string
+//   title?: string
+//   description?: string
+//   date: string
+// }

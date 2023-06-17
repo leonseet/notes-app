@@ -24,17 +24,17 @@ const NoteModal = ({ children }: NoteModalProps) => {
     [onDismiss, overlay, wrapper]
   )
 
-  const onKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") onDismiss()
-    },
-    [onDismiss]
-  )
+  // const onKeyDown = useCallback(
+  //   (e: KeyboardEvent) => {
+  //     if (e.key === "Escape") onDismiss()
+  //   },
+  //   [onDismiss]
+  // )
 
-  useEffect(() => {
-    document.addEventListener("keydown", onKeyDown)
-    return () => document.removeEventListener("keydown", onKeyDown)
-  }, [onKeyDown])
+  // useEffect(() => {
+  //   document.addEventListener("keydown", onKeyDown)
+  //   return () => document.removeEventListener("keydown", onKeyDown)
+  // }, [onKeyDown])
 
   return (
     <div
