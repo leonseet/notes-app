@@ -1,62 +1,60 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import EditorJS from "@editorjs/editorjs";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Note } from "@prisma/client";
-import { useForm } from "react-hook-form";
-import TextareaAutosize from "react-textarea-autosize";
-import * as z from "zod";
+import * as React from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import EditorJS from "@editorjs/editorjs"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Note } from "@prisma/client"
+import { useForm } from "react-hook-form"
+import TextareaAutosize from "react-textarea-autosize"
+import * as z from "zod"
 
-import "@/styles/editor.css";
-import "@/styles/editor-mod.css";
-import { cn } from "@/lib/utils";
-import { notePatchSchema } from "@/lib/validations/note";
-import { buttonVariants } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
-import {
-  Loader2Icon,
-  XIcon,
-  ExpandIcon,
-  Clock3Icon,
-  TagIcon,
-} from "lucide-react";
-import { Separator } from "./ui/separator";
+import "@/styles/editor.css"
+import "@/styles/editor-mod.css"
+import { cn } from "@/lib/utils"
+import { notePatchSchema } from "@/lib/validations/note"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { toast } from "@/components/ui/use-toast"
+import { Loader2Icon, XIcon, ExpandIcon, Clock3Icon, TagIcon, ChevronLeftIcon } from "lucide-react"
+import { BsCloudCheck } from "react-icons/bs"
+import { Separator } from "./ui/separator"
+import moment from "moment"
 
 interface EditorProps {
-  note: Pick<Note, "id" | "title" | "content" | "published">;
+  note: Note
+  fullScreen?: boolean
 }
 
-type FormData = z.infer<typeof notePatchSchema>;
+type FormData = z.infer<typeof notePatchSchema>
 
-const Editor = ({ note }: EditorProps) => {
+const Editor = ({ note, fullScreen }: EditorProps) => {
   const { register, handleSubmit } = useForm<FormData>({
     resolver: zodResolver(notePatchSchema),
-  });
-  const ref = React.useRef<EditorJS>();
-  const router = useRouter();
-  const [isSaving, setIsSaving] = React.useState<boolean>(false);
+  })
+  const ref = React.useRef<EditorJS>()
+  const router = useRouter()
+  const [isSaving, setIsSaving] = React.useState<boolean>(false)
   // const [isMounted, setIsMounted] = React.useState<boolean>(false)
 
   const initializeEditor = React.useCallback(async () => {
-    const EditorJS = (await import("@editorjs/editorjs")).default;
-    const Header = (await import("@editorjs/header")).default;
-    const Embed = (await import("@editorjs/embed")).default;
-    const Table = (await import("@editorjs/table")).default;
-    const List = (await import("@editorjs/list")).default;
-    const Code = (await import("@editorjs/code")).default;
-    const LinkTool = (await import("@editorjs/link")).default;
-    const InlineCode = (await import("@editorjs/inline-code")).default;
+    const EditorJS = (await import("@editorjs/editorjs")).default
+    const Header = (await import("@editorjs/header")).default
+    const Embed = (await import("@editorjs/embed")).default
+    const Table = (await import("@editorjs/table")).default
+    const List = (await import("@editorjs/nested-list")).default
+    const Code = (await import("@editorjs/code")).default
+    const LinkTool = (await import("@editorjs/link")).default
+    const InlineCode = (await import("@editorjs/inline-code")).default
+    const Checklist = (await import("@editorjs/checklist")).default
 
-    const body = notePatchSchema.parse(note);
+    const body = notePatchSchema.parse(note)
 
     if (!ref.current) {
       const editor = new EditorJS({
         holder: "editor",
         onReady() {
-          ref.current = editor;
+          ref.current = editor
         },
         placeholder: "Type here to write your note...",
         inlineToolbar: true,
@@ -69,10 +67,11 @@ const Editor = ({ note }: EditorProps) => {
           inlineCode: InlineCode,
           table: Table,
           embed: Embed,
+          checklist: Checklist,
         },
-      });
+      })
     }
-  }, [note]);
+  }, [note])
 
   // React.useEffect(() => {
   //   if (typeof window !== "undefined") {
@@ -82,20 +81,20 @@ const Editor = ({ note }: EditorProps) => {
 
   React.useEffect(() => {
     // if (isMounted) {
-    initializeEditor();
+    initializeEditor()
 
     return () => {
-      ref.current?.destroy();
-      ref.current = undefined;
-    };
+      ref.current?.destroy()
+      ref.current = undefined
+    }
     // }
-  }, [initializeEditor]);
+  }, [initializeEditor])
 
   async function onSubmit(data: FormData) {
-    setIsSaving(true);
+    setIsSaving(true)
 
-    const blocks = await ref.current?.save();
-    console.log(blocks);
+    const blocks = await ref.current?.save()
+    // console.log(blocks)
 
     const response = await fetch(`/api/notes/${note.id}`, {
       method: "PATCH",
@@ -105,24 +104,30 @@ const Editor = ({ note }: EditorProps) => {
       body: JSON.stringify({
         title: data.title,
         content: blocks,
+        published: true,
       }),
-    });
+    })
 
-    setIsSaving(false);
+    setIsSaving(false)
 
     if (!response?.ok) {
       return toast({
         title: "Something went wrong.",
         description: "Your note was not saved. Please try again.",
         variant: "destructive",
-      });
+      })
     }
 
-    router.refresh();
+    if (fullScreen) {
+      router.push("/dashboard/notes")
+    } else {
+      router.back()
+      router.refresh()
+    }
 
     return toast({
       description: "Your note has been saved.",
-    });
+    })
   }
 
   // if (!isMounted) {
@@ -134,32 +139,56 @@ const Editor = ({ note }: EditorProps) => {
       <div className="grid w-full gap-16">
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center">
-            <Link
-              href="/dashboard/notes"
-              className={cn(buttonVariants({ variant: "ghost" }), "px-1.5")}
-            >
-              <XIcon className="h-5 w-5" />
-            </Link>
-            <Link
-              href="/dashboard/notes"
-              className={cn(buttonVariants({ variant: "ghost" }), "px-1.5")}
-            >
-              <ExpandIcon className="h-4 w-4" />
-            </Link>
-            <p className="text-sm ml-10 text-muted-foreground">
-              {note.published ? "Published" : "Draft"}
-            </p>
+            {!fullScreen && (
+              <div className="flex items-center">
+                <Button
+                  onClick={() => router.back()}
+                  className="px-1.5"
+                  variant="ghost"
+                  type="button"
+                >
+                  <XIcon className="h-5 w-5" />
+                </Button>
+                <Button
+                  onClick={() => location.reload()}
+                  // onClick={() => router.push(`/note/${note.id}`)}
+                  className="px-1.5"
+                  variant="ghost"
+                  type="button"
+                >
+                  <ExpandIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            {fullScreen && (
+              <div>
+                <Link
+                  href="/dashboard/notes"
+                  className={cn(buttonVariants({ variant: "ghost" }), "px-1.5 space-x-2")}
+                >
+                  <ChevronLeftIcon className="h-5 w-5" />
+                  <p>Back</p>
+                </Link>
+              </div>
+            )}
+            {note.published && (
+              <div className="flex items-center gap-2 justify-center">
+                <BsCloudCheck className="ml-10 h-5 w-5 text-green-700" />
+                <p className="text-sm  text-muted-foreground">
+                  {moment(note.updatedAt).format("MMM Do YY, h:mm a")}
+                </p>
+              </div>
+            )}
+            {!note.published && <p className="text-sm ml-10 text-muted-foreground">Draft</p>}
           </div>
-          <button type="submit" className={cn(buttonVariants())}>
+          <Button type="submit">
             {isSaving && <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />}
             <span>Save</span>
-          </button>
+          </Button>
         </div>
 
-        <div
-          className="prose-stone dark:prose-invert mx-16"
-          style={{ minWidth: "100%" }}
-        >
+        <div className="prose-stone dark:prose-invert px-16" style={{ minWidth: "100%" }}>
           <TextareaAutosize
             autoFocus
             id="title"
@@ -175,10 +204,10 @@ const Editor = ({ note }: EditorProps) => {
                 <Clock3Icon className="w-4 h-4" />
                 <p>Created</p>
               </div>
-              <div className="flex items-center gap-1">
+              {/* <div className="flex items-center gap-1">
                 <Clock3Icon className="w-4 h-4" />
                 <p>Modified</p>
-              </div>
+              </div> */}
               <div className="flex items-center gap-1">
                 <TagIcon className="w-4 h-4" />
                 <p>Tags</p>
@@ -186,33 +215,26 @@ const Editor = ({ note }: EditorProps) => {
             </div>
 
             <div className="flex flex-col w-fit gap-2">
-              <input
-                type="text"
-                value="June 9, 2023"
-                className="ml-20 outline-none bg-transparent"
-              />
-              <input
-                type="text"
-                value="June 9, 2023"
-                className="ml-20 outline-none bg-transparent"
-              />
+              <p className="ml-20 outline-none bg-transparent">
+                {moment(note.createdAt).format("MMMM Do YYYY, h:mm a")}
+              </p>
+              {/* <p className="ml-20 outline-none bg-transparent">
+                {moment(note.updatedAt).format("MMMM Do YYYY, h:mm a")}
+              </p> */}
             </div>
           </div>
 
           <Separator className="my-6" />
-          <div id="editor" className="h-fit" />
+          <div id="editor" />
 
-          <p className="-mt-72 text-sm text-gray-500 opacity-40">
-            Use{" "}
-            <kbd className="rounded-md border bg-muted px-1 text-xs uppercase">
-              Tab
-            </kbd>{" "}
-            to open the command menu.
+          <p className="mt-6text-sm text-gray-500 opacity-40">
+            Use <kbd className="rounded-md border bg-muted px-1 text-xs uppercase">Tab</kbd> to open
+            the command menu.
           </p>
         </div>
       </div>
     </form>
-  );
-};
+  )
+}
 
-export default Editor;
+export default Editor

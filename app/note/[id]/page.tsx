@@ -1,14 +1,30 @@
-// import DashboardTopbar from "@/components/DashboardTopbar"
-// import { Button } from "@/components/ui/button"
-// import { MoreVertical } from "lucide-react"
-// import { store } from "@/redux/store"
+import CommandButton from "@/components/CommandButton";
+import Editor from "@/components/Editor";
+import { db } from "@/lib/db";
 
 export const metadata = {
-  title: "Dashboard",
-}
+  title: "Note Page",
+};
 
-export default async function NotePage() {
-  // const notes = store.getState().notes.notes
+export default async function NotePage({ params }) {
+  const id = params.id;
+  const note = await db.note.findFirst({
+    where: {
+      id,
+    },
+  });
 
-  return <div>Note</div>
+  if (!note) {
+    return null;
+  }
+  return (
+    <div className="bg-background min-h-screen border py-6">
+      <div className="container">
+        <Editor fullScreen note={note} />
+      </div>
+      <div className="hidden">
+        <CommandButton />
+      </div>
+    </div>
+  );
 }

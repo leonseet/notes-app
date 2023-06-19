@@ -3,13 +3,26 @@ import { Button } from "@/components/ui/button"
 import { MoreVertical } from "lucide-react"
 import { store } from "@/redux/store"
 import Link from "next/link"
+import { db } from "@/lib/db"
+import moment from "moment"
 
 export const metadata = {
   title: "Dashboard",
 }
 
 export default async function DashboardPage() {
-  const notes = store.getState().notes.notes
+  const notes = await db.note.findMany({
+    select: {
+      id: true,
+      title: true,
+      published: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  })
 
   return (
     <div>
@@ -31,7 +44,9 @@ export default async function DashboardPage() {
           >
             <div className="flex flex-col">
               <p className="hover:underline cursor-pointer">{note.title}</p>
-              <p className="text-secondary-foreground text-xs">{note.date}</p>
+              <p className="text-secondary-foreground text-xs">
+                {moment(note.updatedAt).format("MMMM Do YYYY, h:mm a")}
+              </p>
             </div>
             <MoreVertical className="cursor-pointer" />
           </Link>
