@@ -4,6 +4,8 @@ import * as z from "zod"
 // import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { notePatchSchema } from "@/lib/validations/note"
+import { getServerSession } from "next-auth"
+import { authOptions } from "../../auth/[...nextauth]/route"
 
 const routeContextSchema = z.object({
   params: z.object({
@@ -17,9 +19,9 @@ export async function DELETE(req: Request, context: z.infer<typeof routeContextS
     const { params } = routeContextSchema.parse(context)
 
     // Check if the user has access to this note.
-    // if (!(await verifyCurrentUserHasAccessToNote(params.noteId))) {
-    //   return new Response(null, { status: 403 })
-    // }
+    if (!(await verifyCurrentUserHasAccessToNote(params.noteId))) {
+      return new Response(null, { status: 403 })
+    }
 
     // Delete the note.
     await db.note.delete({
@@ -44,9 +46,9 @@ export async function PATCH(req: Request, context: z.infer<typeof routeContextSc
     const { params } = routeContextSchema.parse(context)
 
     // Check if the user has access to this note.
-    // if (!(await verifyCurrentUserHasAccessToNote(params.noteId))) {
-    //   return new Response(null, { status: 403 })
-    // }
+    if (!(await verifyCurrentUserHasAccessToNote(params.noteId))) {
+      return new Response(null, { status: 403 })
+    }
 
     // Get the request body and validate it.
     const json = await req.json()
@@ -76,14 +78,14 @@ export async function PATCH(req: Request, context: z.infer<typeof routeContextSc
   }
 }
 
-// async function verifyCurrentUserHasAccessToNote(noteId: string) {
-//   const session = await getServerSession(authOptions)
-//   const count = await db.note.count({
-//     where: {
-//       id: noteId,
-//       authorId: session?.user.id,
-//     },
-//   })
+async function verifyCurrentUserHasAccessToNote(noteId: string) {
+  const session = await getServerSession(authOptions)
+  const count = await db.note.count({
+    where: {
+      id: noteId,
+      userId: session?.user.id,
+    },
+  })
 
-//   return count > 0
-// }
+  return count > 0
+}
