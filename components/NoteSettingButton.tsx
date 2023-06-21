@@ -10,23 +10,47 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Note } from "@prisma/client"
+import { toast } from "./ui/use-toast"
+import { useRouter } from "next/navigation"
 
-interface NoteSettingButtonProps {}
+interface NoteSettingButtonProps {
+  noteId: string
+}
 
-const NoteSettingButton: FC<NoteSettingButtonProps> = ({}) => {
+const NoteSettingButton: FC<NoteSettingButtonProps> = ({ noteId }) => {
   const [firstClick, setFirstClick] = useState(false)
+  const router = useRouter()
 
-  const onDelete = (event) => {
+  const onDelete = async (event) => {
     event.preventDefault()
     if (firstClick) {
-      console.log("delete")
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: "DELETE",
+      })
+
       setFirstClick(false)
+
+      if (!response?.ok) {
+        return toast({
+          title: "Something went wrong.",
+          description: "Your note was not deleted. Please try again.",
+          variant: "destructive",
+        })
+      }
+
+      router.refresh()
+
+      return toast({
+        description: "Your note was deleted.",
+        variant: "default",
+      })
     } else {
       setFirstClick(true)
     }
   }
 
-  const onOpenChange = (open) => {
+  const onOpenChange = () => {
     setFirstClick(false)
   }
 
@@ -40,7 +64,11 @@ const NoteSettingButton: FC<NoteSettingButtonProps> = ({}) => {
       <DropdownMenuContent align="end" className="w-36">
         <DropdownMenuItem
           onSelect={onDelete}
-          className={firstClick ? " bg-red-500 text-white focus:bg-red-500 focus:text-white" : ""}
+          className={
+            firstClick
+              ? " bg-red-500 text-white focus:bg-red-500 focus:text-white cursor-pointer"
+              : "cursor-pointer"
+          }
         >
           {firstClick ? "Confirm Delete?" : "Delete"}
         </DropdownMenuItem>

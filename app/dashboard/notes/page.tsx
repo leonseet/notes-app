@@ -10,6 +10,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { redirect } from "next/navigation"
 import NewNoteButton from "@/components/NewNoteButton"
 import NoteSettingButton from "@/components/NoteSettingButton"
+import NoteCard from "@/components/NoteCard"
 
 export const metadata = {
   title: "Dashboard",
@@ -50,17 +51,7 @@ export default async function DashboardPage() {
         </div>
 
         {notes.map((note) => (
-          <div key={note.id} className="border flex justify-between px-4 py-4 items-center">
-            <div className="flex flex-col">
-              <Link href={`/note/${note.id}`} className="hover:underline cursor-pointer">
-                {note.title}
-              </Link>
-              <p className="text-secondary-foreground text-xs">
-                {moment(note.updatedAt).format("MMMM Do YYYY, h:mm a")}
-              </p>
-            </div>
-            <NoteSettingButton />
-          </div>
+          <NoteCard key={note.id} note={note} />
         ))}
       </main>
     </div>
