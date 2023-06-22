@@ -1,24 +1,25 @@
-import NoteModal from "@/components/NoteModal";
-import Editor from "@/components/Editor";
-import { db } from "@/lib/db";
+import NoteModal from "@/components/NoteModal"
+import Editor from "@/components/Editor"
+import { db } from "@/lib/db"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default async function NoteModalPage({ params }) {
-  const id = params.id;
+  const id = params.id
   const note = await db.note.findFirst({
     where: {
       id,
     },
-  });
+  })
 
   if (!note) {
-    return null;
+    return null
   }
 
   return (
     <NoteModal>
-      <div className="bg-background rounded-md h-full p-6 border shadow-md">
+      <ScrollArea className="h-full rounded-md border bg-background pb-6 shadow-md">
         <Editor note={note} />
-      </div>
+      </ScrollArea>
     </NoteModal>
-  );
+  )
 }

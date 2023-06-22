@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "./ui/button"
-import { CommandIcon, ArrowRight } from "lucide-react"
+import { CommandIcon, ArrowRight, Loader2 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import {
@@ -15,12 +15,14 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command"
+import useNewNote from "@/hooks/use-new-note"
 
 interface CommandButtonProps {}
 
 const CommandButton = ({}: CommandButtonProps) => {
   const [open, setOpen] = useState<boolean>(false)
   const { setTheme } = useTheme()
+  const { createNewNote, isLoading } = useNewNote()
 
   const router = useRouter()
 
@@ -45,11 +47,18 @@ const CommandButton = ({}: CommandButtonProps) => {
     setOpen(false)
   }
 
+  const handleNewNote = async () => {
+    createNewNote()
+    if (!isLoading) {
+      setOpen(false)
+    }
+  }
+
   return (
     <div>
       <Button variant="background" size="xs" className="space-x-2">
         <div className="flex items-center gap-0.5">
-          <CommandIcon className="w-3 h-3" />
+          <CommandIcon className="h-3 w-3" />
           <p>K</p>
         </div>
         <p>Command</p>
@@ -67,7 +76,7 @@ const CommandButton = ({}: CommandButtonProps) => {
               value="change theme to dark"
             >
               <p>Change theme to</p>
-              <ArrowRight className="w-0.5 h-0.5" />
+              <ArrowRight className="h-0.5 w-0.5" />
               <p>Dark</p>
             </CommandItem>
             <CommandItem
@@ -76,7 +85,7 @@ const CommandButton = ({}: CommandButtonProps) => {
               value="change theme to light"
             >
               <p>Change theme to</p>
-              <ArrowRight className="w-0.5 h-0.5" />
+              <ArrowRight className="h-0.5 w-0.5" />
               <p>Light</p>
             </CommandItem>
           </CommandGroup>
@@ -90,7 +99,7 @@ const CommandButton = ({}: CommandButtonProps) => {
               value="go to profile"
             >
               <p>Go to</p>
-              <ArrowRight className="w-0.5 h-0.5" />
+              <ArrowRight className="h-0.5 w-0.5" />
               <p>Profile</p>
             </CommandItem>
             <CommandItem
@@ -99,7 +108,7 @@ const CommandButton = ({}: CommandButtonProps) => {
               value="go to preference"
             >
               <p>Go to</p>
-              <ArrowRight className="w-0.5 h-0.5" />
+              <ArrowRight className="h-0.5 w-0.5" />
               <p>Preference</p>
             </CommandItem>
             <CommandItem
@@ -108,7 +117,7 @@ const CommandButton = ({}: CommandButtonProps) => {
               value="go to notes"
             >
               <p>Go to</p>
-              <ArrowRight className="w-0.5 h-0.5" />
+              <ArrowRight className="h-0.5 w-0.5" />
               <p>Notes</p>
             </CommandItem>
             <CommandItem
@@ -117,7 +126,7 @@ const CommandButton = ({}: CommandButtonProps) => {
               value="go to todos"
             >
               <p>Go to</p>
-              <ArrowRight className="w-0.5 h-0.5" />
+              <ArrowRight className="h-0.5 w-0.5" />
               <p>Todos</p>
             </CommandItem>
           </CommandGroup>
@@ -125,7 +134,10 @@ const CommandButton = ({}: CommandButtonProps) => {
           <CommandSeparator />
 
           <CommandGroup heading="Actions">
-            <CommandItem value="create new note">Create New Note</CommandItem>
+            <CommandItem onSelect={handleNewNote} value="create new note" className="flex">
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create New Note
+            </CommandItem>
             <CommandItem value="log out">Log Out</CommandItem>
           </CommandGroup>
         </CommandList>

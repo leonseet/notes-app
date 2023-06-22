@@ -20,6 +20,7 @@ import { Loader2Icon, XIcon, ExpandIcon, Clock3Icon, TagIcon, ChevronLeftIcon } 
 import { BsCloudCheck } from "react-icons/bs"
 import { Separator } from "./ui/separator"
 import moment from "moment"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 interface EditorProps {
   note: Note
@@ -32,12 +33,13 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
   const { register, handleSubmit } = useForm<FormData>({
     resolver: zodResolver(notePatchSchema),
   })
-  const ref = React.useRef<EditorJS>()
+  const ref = useRef<EditorJS>()
   const router = useRouter()
-  const [isSaving, setIsSaving] = React.useState<boolean>(false)
+  const [isSaving, setIsSaving] = useState<boolean>(false)
+  const [top, setTop] = useState(true)
   // const [isMounted, setIsMounted] = React.useState<boolean>(false)
 
-  const initializeEditor = React.useCallback(async () => {
+  const initializeEditor = useCallback(async () => {
     const EditorJS = (await import("@editorjs/editorjs")).default
     const Header = (await import("@editorjs/header")).default
     const Embed = (await import("@editorjs/embed")).default
@@ -79,7 +81,7 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
   //   }
   // }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     // if (isMounted) {
     initializeEditor()
 
@@ -130,6 +132,14 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
     })
   }
 
+  useEffect(() => {
+    const scrollHandler = () => {
+      window.pageYOffset > 10 ? setTop(false) : setTop(true)
+    }
+    window.addEventListener("scroll", scrollHandler)
+    return () => window.removeEventListener("scroll", scrollHandler)
+  }, [top])
+
   // if (!isMounted) {
   //   return null
   // }
@@ -137,7 +147,11 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid w-full gap-16">
-        <div className="flex w-full items-center justify-between">
+        <div
+          className={`sticky top-0 z-30 flex w-full items-center justify-between bg-background px-4 py-4 ${
+            !top && `shadow-sm dark:shadow-slate-900`
+          }`}
+        >
           <div className="flex items-center">
             {!fullScreen && (
               <div className="flex items-center">
@@ -165,7 +179,7 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
               <div>
                 <Link
                   href="/dashboard/notes"
-                  className={cn(buttonVariants({ variant: "ghost" }), "px-1.5 space-x-2")}
+                  className={cn(buttonVariants({ variant: "ghost" }), "space-x-2 px-1.5")}
                 >
                   <ChevronLeftIcon className="h-5 w-5" />
                   <p>Back</p>
@@ -173,14 +187,14 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
               </div>
             )}
             {note.published && (
-              <div className="flex items-center gap-2 justify-center">
+              <div className="flex items-center justify-center gap-2">
                 <BsCloudCheck className="ml-10 h-5 w-5 text-green-700" />
                 <p className="text-sm  text-muted-foreground">
                   {moment(note.updatedAt).format("MMM Do YY, h:mm a")}
                 </p>
               </div>
             )}
-            {!note.published && <p className="text-sm ml-10 text-muted-foreground">Draft</p>}
+            {!note.published && <p className="ml-10 text-sm text-muted-foreground">Draft</p>}
           </div>
           <Button type="submit">
             {isSaving && <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />}
@@ -188,49 +202,51 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
           </Button>
         </div>
 
-        <div className="prose-stone dark:prose-invert px-16" style={{ minWidth: "100%" }}>
-          <TextareaAutosize
-            autoFocus
-            id="title"
-            defaultValue={note.title}
-            placeholder="Note title"
-            className="w-full resize-none appearance-none overflow-hidden bg-transparent text-5xl font-bold focus:outline-none"
-            {...register("title")}
-          />
+        <div className={`${fullScreen && "container"}`}>
+          <div className="prose-stone px-16 dark:prose-invert" style={{ minWidth: "100%" }}>
+            <TextareaAutosize
+              autoFocus
+              id="title"
+              defaultValue={note.title}
+              placeholder="Note title"
+              className="w-full resize-none appearance-none overflow-hidden bg-transparent text-5xl font-bold focus:outline-none"
+              {...register("title")}
+            />
 
-          <div className="mt-6 flex">
-            <div className="flex flex-col w-24 gap-2">
-              <div className="flex items-center gap-1">
-                <Clock3Icon className="w-4 h-4" />
-                <p>Created</p>
-              </div>
-              {/* <div className="flex items-center gap-1">
+            <div className="mt-6 flex">
+              <div className="flex w-24 flex-col gap-2">
+                <div className="flex items-center gap-1">
+                  <Clock3Icon className="h-4 w-4" />
+                  <p>Created</p>
+                </div>
+                {/* <div className="flex items-center gap-1">
                 <Clock3Icon className="w-4 h-4" />
                 <p>Modified</p>
               </div> */}
-              <div className="flex items-center gap-1">
-                <TagIcon className="w-4 h-4" />
-                <p>Tags</p>
+                <div className="flex items-center gap-1">
+                  <TagIcon className="h-4 w-4" />
+                  <p>Tags</p>
+                </div>
+              </div>
+
+              <div className="flex w-fit flex-col gap-2">
+                <p className="ml-20 bg-transparent outline-none">
+                  {moment(note.createdAt).format("MMMM Do YYYY, h:mm a")}
+                </p>
+                {/* <p className="ml-20 outline-none bg-transparent">
+                {moment(note.updatedAt).format("MMMM Do YYYY, h:mm a")}
+              </p> */}
               </div>
             </div>
 
-            <div className="flex flex-col w-fit gap-2">
-              <p className="ml-20 outline-none bg-transparent">
-                {moment(note.createdAt).format("MMMM Do YYYY, h:mm a")}
-              </p>
-              {/* <p className="ml-20 outline-none bg-transparent">
-                {moment(note.updatedAt).format("MMMM Do YYYY, h:mm a")}
-              </p> */}
-            </div>
+            <Separator className="my-6" />
+            <div id="editor" />
+
+            <p className="mt-6text-sm text-gray-500 opacity-40">
+              Use <kbd className="rounded-md border bg-muted px-1 text-xs uppercase">Tab</kbd> to
+              open the command menu.
+            </p>
           </div>
-
-          <Separator className="my-6" />
-          <div id="editor" />
-
-          <p className="mt-6text-sm text-gray-500 opacity-40">
-            Use <kbd className="rounded-md border bg-muted px-1 text-xs uppercase">Tab</kbd> to open
-            the command menu.
-          </p>
         </div>
       </div>
     </form>
