@@ -21,6 +21,13 @@ import { BsCloudCheck } from "react-icons/bs"
 import { Separator } from "./ui/separator"
 import moment from "moment"
 import { useCallback, useEffect, useRef, useState } from "react"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+// import CreatableSelect from "react-select/creatable"
 
 interface EditorProps {
   note: Note
@@ -37,7 +44,6 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
   const router = useRouter()
   const [isSaving, setIsSaving] = useState<boolean>(false)
   const [top, setTop] = useState(true)
-  // const [isMounted, setIsMounted] = React.useState<boolean>(false)
 
   const initializeEditor = useCallback(async () => {
     const EditorJS = (await import("@editorjs/editorjs")).default
@@ -75,28 +81,19 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
     }
   }, [note])
 
-  // React.useEffect(() => {
-  //   if (typeof window !== "undefined") {
-  //     setIsMounted(true)
-  //   }
-  // }, [])
-
   useEffect(() => {
-    // if (isMounted) {
     initializeEditor()
 
     return () => {
       ref.current?.destroy()
       ref.current = undefined
     }
-    // }
   }, [initializeEditor])
 
   async function onSubmit(data: FormData) {
     setIsSaving(true)
 
     const blocks = await ref.current?.save()
-    // console.log(blocks)
 
     const response = await fetch(`/api/notes/${note.id}`, {
       method: "PATCH",
@@ -134,15 +131,11 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
 
   useEffect(() => {
     const scrollHandler = () => {
-      window.pageYOffset > 10 ? setTop(false) : setTop(true)
+      window.scrollY > 10 ? setTop(false) : setTop(true)
     }
     window.addEventListener("scroll", scrollHandler)
     return () => window.removeEventListener("scroll", scrollHandler)
   }, [top])
-
-  // if (!isMounted) {
-  //   return null
-  // }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -165,7 +158,6 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
                 </Button>
                 <Button
                   onClick={() => location.reload()}
-                  // onClick={() => router.push(`/note/${note.id}`)}
                   className="px-1.5"
                   variant="ghost"
                   type="button"
@@ -203,7 +195,7 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
         </div>
 
         <div className={`${fullScreen && "container"}`}>
-          <div className="prose-stone px-16 dark:prose-invert" style={{ minWidth: "100%" }}>
+          <div className="prose-stone dark:prose-invert px-16" style={{ minWidth: "100%" }}>
             <TextareaAutosize
               autoFocus
               id="title"
@@ -219,27 +211,52 @@ const Editor = ({ note, fullScreen }: EditorProps) => {
                   <Clock3Icon className="h-4 w-4" />
                   <p>Created</p>
                 </div>
-                {/* <div className="flex items-center gap-1">
-                <Clock3Icon className="w-4 h-4" />
-                <p>Modified</p>
-              </div> */}
                 <div className="flex items-center gap-1">
                   <TagIcon className="h-4 w-4" />
                   <p>Tags</p>
                 </div>
               </div>
 
-              <div className="flex w-fit flex-col gap-2">
-                <p className="ml-20 bg-transparent outline-none">
+              <div className="ml-20 flex w-fit flex-col gap-2">
+                <p className="bg-transparent outline-none">
                   {moment(note.createdAt).format("MMMM Do YYYY, h:mm a")}
                 </p>
-                {/* <p className="ml-20 outline-none bg-transparent">
-                {moment(note.updatedAt).format("MMMM Do YYYY, h:mm a")}
-              </p> */}
+                {/* <CreatableSelect
+                  className="w-48"
+                  classNames={{
+                    valueContainer: () => "bg-background",
+                    indicatorsContainer: () => "bg-background",
+                    control: () => "",
+                    menuList: () => "bg-background border-white border",
+                  }}
+                /> */}
               </div>
             </div>
 
             <Separator className="my-6" />
+
+            <Accordion type="multiple" className="-my-4 w-full">
+              <AccordionItem className="border-none" value="item-1">
+                <AccordionTrigger className="">Todos</AccordionTrigger>
+                <AccordionContent>Yes. It adheres to the WAI-ARIA design pattern.</AccordionContent>
+              </AccordionItem>
+              <AccordionItem className="border-none" value="item-2">
+                <AccordionTrigger>In Progress</AccordionTrigger>
+                <AccordionContent>
+                  Yes. It comes with default styles that matches the other components&apos;
+                  aesthetic.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem className="border-none" value="item-3">
+                <AccordionTrigger>Done</AccordionTrigger>
+                <AccordionContent>
+                  Yes. It&apos;s animated by default, but you can disable it if you prefer.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            <Separator className="my-6" />
+
             <div id="editor" />
 
             <p className="mt-6text-sm text-gray-500 opacity-40">
