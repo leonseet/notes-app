@@ -28,10 +28,10 @@ const DashboardSidebar = ({}: DashboardSidebarProps) => {
               <p className="text-md">Notes</p>
             </Button>
           </Link>
-          <Link href="/dashboard/todos">
+          <Link href="/dashboard/tasks">
             <Button variant="sidenav" size="xs">
               <ListChecks className="h-5 w-5" />
-              <p className="text-md">Todos</p>
+              <p className="text-md">Tasks</p>
             </Button>
           </Link>
         </div>

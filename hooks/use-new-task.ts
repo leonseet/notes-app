@@ -1,21 +1,27 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
+import { TaskStatus } from "@/types"
 
-const useNewNote = () => {
+interface useNewTaskProps {
+  taskStatus: TaskStatus
+}
+
+const useNewTask = ({ taskStatus }: useNewTaskProps) => {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  async function createNewNote() {
+  async function createNewTask() {
     setIsLoading(true)
 
-    const response = await fetch("/api/notes", {
+    const response = await fetch("/api/tasks", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        title: "Untitled Post",
+        title: "Untitled Task",
+        taskStatus,
       }),
     })
 
@@ -24,20 +30,20 @@ const useNewNote = () => {
     if (!response?.ok) {
       return toast({
         title: "Something went wrong.",
-        description: "Your note was not created. Please try again.",
+        description: "Your task was not created. Please try again.",
         variant: "destructive",
       })
     }
 
-    const note = await response.json()
+    const task = await response.json()
 
     // This forces a cache invalidation.
     router.refresh()
 
-    router.push(`/note/${note.id}`)
+    // router.push(`/task/${task.id}`)
   }
 
-  return { createNewNote, isLoading }
+  return { createNewTask, isLoading }
 }
 
-export default useNewNote
+export default useNewTask

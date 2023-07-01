@@ -3,6 +3,8 @@ export type DashboardConfig = {
   sidebarNav: SidebarNavItem[]
 }
 
+export type TaskStatus = "todos" | "inprogress" | "done"
+
 // export type Note = {
 //   id: string
 //   title?: string
