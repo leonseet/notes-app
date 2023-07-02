@@ -3,13 +3,13 @@ import * as z from "zod"
 
 // import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { notePatchSchema } from "@/lib/validations/note"
+// import { taskPatchSchema } from "@/lib/validations/task"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]/route"
 
 const routeContextSchema = z.object({
   params: z.object({
-    noteId: z.string(),
+    taskId: z.string(),
   }),
 })
 
@@ -18,15 +18,15 @@ export async function DELETE(req: Request, context: z.infer<typeof routeContextS
     // Validate the route params.
     const { params } = routeContextSchema.parse(context)
 
-    // Check if the user has access to this note.
-    if (!(await verifyCurrentUserHasAccessToNote(params.noteId))) {
+    // Check if the user has access to this task.
+    if (!(await verifyCurrentUserHasAccessTotask(params.taskId))) {
       return new Response(null, { status: 403 })
     }
 
-    // Delete the note.
-    await db.note.delete({
+    // Delete the task.
+    await db.task.delete({
       where: {
-        id: params.noteId as string,
+        id: params.taskId as string,
       },
     })
 
@@ -45,26 +45,27 @@ export async function PATCH(req: Request, context: z.infer<typeof routeContextSc
     // Validate route params.
     const { params } = routeContextSchema.parse(context)
 
-    // Check if the user has access to this note.
-    if (!(await verifyCurrentUserHasAccessToNote(params.noteId))) {
+    // Check if the user has access to this task.
+    if (!(await verifyCurrentUserHasAccessTotask(params.taskId))) {
       return new Response(null, { status: 403 })
     }
 
     // Get the request body and validate it.
-    const json = await req.json()
-    const body = notePatchSchema.parse(json)
+    // const json = await req.json()
+    // const body = taskPatchSchema.parse(json)
+    const body = await req.json()
 
-    // Update the note.
+    // Update the task.
     // TODO: Implement sanitization for content.
-    await db.note.update({
+    await db.task.update({
       where: {
-        id: params.noteId,
+        id: params.taskId,
       },
       data: {
         title: body.title,
         content: body.content,
         updatedAt: new Date(),
-        published: body.published,
+        lexoRank: body.lexoRank,
       },
     })
 
@@ -78,11 +79,11 @@ export async function PATCH(req: Request, context: z.infer<typeof routeContextSc
   }
 }
 
-async function verifyCurrentUserHasAccessToNote(noteId: string) {
+async function verifyCurrentUserHasAccessTotask(taskId: string) {
   const session = await getServerSession(authOptions)
-  const count = await db.note.count({
+  const count = await db.task.count({
     where: {
-      id: noteId,
+      id: taskId,
       userId: session?.user.id,
     },
   })

@@ -4,13 +4,15 @@ import { TaskStatus } from "@/types"
 import { Plus } from "lucide-react"
 import { FC } from "react"
 import { Button } from "./ui/button"
+import { Task } from "@prisma/client"
 
 interface NewTaskButtonProps {
   taskStatus: TaskStatus
+  tasks: Task[]
 }
 
-const NewTaskButton: FC<NewTaskButtonProps> = ({ taskStatus }) => {
-  const { createNewTask, isLoading } = useNewTask({ taskStatus })
+const NewTaskButton: FC<NewTaskButtonProps> = ({ taskStatus, tasks }) => {
+  const { createNewTask, isLoading } = useNewTask({ taskStatus, tasks })
 
   return (
     <div>

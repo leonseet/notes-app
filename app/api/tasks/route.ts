@@ -12,6 +12,7 @@ const taskCreateSchema = z.object({
   title: z.string(),
   taskStatus: z.string(),
   content: z.string().optional(),
+  lexoRank: z.string(),
 })
 
 // export async function GET() {
@@ -60,6 +61,7 @@ export async function POST(req: Request) {
         content: body.content,
         status: body.taskStatus,
         userId: user.id,
+        lexoRank: body.lexoRank,
       },
       select: {
         id: true,

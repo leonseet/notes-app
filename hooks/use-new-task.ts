@@ -2,17 +2,21 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 import { TaskStatus } from "@/types"
+import { Task } from "@prisma/client"
+import { addTopLexorank } from "@/lib/add-top-lexorank"
 
 interface useNewTaskProps {
   taskStatus: TaskStatus
+  tasks: Task[]
 }
 
-const useNewTask = ({ taskStatus }: useNewTaskProps) => {
+const useNewTask = ({ taskStatus, tasks }: useNewTaskProps) => {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   async function createNewTask() {
     setIsLoading(true)
+    const newRank = await addTopLexorank(tasks)
 
     const response = await fetch("/api/tasks", {
       method: "POST",
@@ -22,6 +26,7 @@ const useNewTask = ({ taskStatus }: useNewTaskProps) => {
       body: JSON.stringify({
         title: "Untitled Task",
         taskStatus,
+        lexoRank: newRank,
       }),
     })
 
@@ -35,7 +40,7 @@ const useNewTask = ({ taskStatus }: useNewTaskProps) => {
       })
     }
 
-    const task = await response.json()
+    // const task = await response.json()
 
     // This forces a cache invalidation.
     router.refresh()

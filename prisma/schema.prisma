@@ -80,16 +80,21 @@ model Note {
   userId    String
 
   user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model Task {
   id        String   @id @default(cuid())
   title     String
-  status    String
   content   Json?
+  status    String
+  lexoRank  String
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @default(now()) @map(name: "updated_at")
   userId    String
 
   user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
